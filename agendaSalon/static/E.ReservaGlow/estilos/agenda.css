@@ -1,0 +1,311 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+}
+
+body {
+    background-color: #A3A3A3;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+/* CONTENEDOR PRINCIPAL CON BORDES REDONDEADOS DE 10px */
+.app-container {
+    display: flex;
+    width: 90%;
+    max-width: 1100px;
+    height: 725px;
+    background-color: #EFEFEF;
+    border-radius: 10px; /* Bordes suavizados */
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+}
+
+/* SIDEBAR IZQUIERDO */
+.sidebar {
+    width: 240px;
+    background-color: #CBCBC6;
+    padding: 25px 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+
+.brand h2 {
+    font-size: 1.1rem;
+    color: #1A1A1A;
+}
+
+.brand h2 span {
+    color: #2D6A3F;
+}
+
+.role {
+    font-size: 0.8rem;
+    color: #666;
+    margin-top: 4px;
+}
+
+.nav-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 20px;
+    flex-grow: 1;
+}
+
+.nav-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+/* ESTADO BASE DEL ÍTEM DE NAVEGACIÓN */
+.nav-item {
+    text-decoration: none;
+    color: #262626;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    
+    /* 1. Transición suave para todos los cambios */
+    transition: all 0.25s ease-in-out; 
+}
+
+/* ANIMACIÓN AL PASAR EL CURSOR (:hover) */
+.nav-item:hover {
+    background-color: #BDBDB8;           /* Cambia el fondo a un tono más oscuro */
+    border: 1px solid #9E9E99;          /* Aparece un borde sutil */
+    transform: translateX(4px);          /* Mueve ligeramente el botón a la derecha */
+    cursor: pointer;
+}
+
+/* ESTADO ACTIVO (Para la pestaña en la que estás actualmente) */
+.nav-item.active {
+    background-color: #BDBDB8;
+    border: 1px solid #9E9E99;
+    font-weight: 600;
+}
+
+.user-card {
+    background-color: #BDBDB8;
+    padding: 10px 12px;
+    border-radius: 10px; /* Bordes redondeados */
+    border: 1px solid #9E9E99;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.avatar {
+    width: 36px;
+    height: 36px;
+    background-color: #D4B458;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.85rem;
+}
+
+.user-info strong {
+    display: block;
+    font-size: 0.8rem;
+}
+
+.user-info p {
+    font-size: 0.75rem;
+    color: #555;
+}
+
+.logout-icon {
+    margin-left: auto;
+    cursor: pointer;
+}
+
+/* ÁREA CENTRAL */
+.main-content {
+    flex: 1;
+    background-color: #EFEFEF;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid #D0D0D0;
+}
+
+.content-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px;
+    border-bottom: 1px solid #D0D0D0;
+}
+
+.content-header h1 {
+    font-size: 1.8rem;
+    color: #111;
+}
+
+.subtitle {
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.header-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.btn-today {
+    background-color: #D3D3CD;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 10px; /* Bordes redondeados */
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.btn-new-appointment {
+    background-color: #F1CBBF;
+    border: 1px solid #E2B2A3;
+    padding: 8px 18px;
+    border-radius: 10px; /* Bordes redondeados */
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* BLOQUES DE HORARIOS */
+.time-slots {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.time-row {
+    display: flex;
+    height: 60px;
+    border-bottom: 1px solid #D6D6D6;
+}
+
+.time-label {
+    width: 80px;
+    padding: 10px;
+    font-size: 0.75rem;
+    color: #777;
+    border-right: 1px solid #E0E0E0;
+}
+
+.time-cell {
+    flex: 1;
+    padding: 5px 10px;
+}
+
+.appointment-card {
+    background-color: #EBBAB5;
+    border: 1px solid #E0A49E;
+    border-radius: 10px; /* Tarjeta de cita redondeada */
+    padding: 6px 12px;
+    width: 140px;
+}
+
+.appointment-card strong {
+    font-size: 0.75rem;
+    display: block;
+}
+
+.appointment-card p {
+    font-size: 0.7rem;
+    color: #444;
+}
+
+.assistant-tag {
+    font-size: 0.7rem;
+    font-weight: bold;
+}
+
+/* PANEL DERECHO */
+.right-panel {
+    width: 220px;
+    background-color: #EFEFEF;
+    padding: 20px 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+.workers-section h3 {
+    font-size: 0.85rem;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.worker-card {
+    background-color: #C8C2BC;
+    border-radius: 10px; /* Bordes redondeados */
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.circle-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+}
+
+.avatar-1 { background-color: #E39994; }
+.avatar-2 { background-color: #D3BA63; }
+.avatar-3 { background-color: #787DB1; }
+
+.worker-card strong {
+    font-size: 0.8rem;
+    display: block;
+}
+
+.status {
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.status.available { color: #2D6A3F; }
+.status.busy { color: #A84343; }
+
+/* RESUMEN MES */
+.summary-card {
+    background-color: #D8D8D8;
+    border-radius: 10px; /* Bordes redondeados */
+    border: 1px solid #C0C0C0;
+    padding: 12px;
+}
+
+.summary-card h3 {
+    font-size: 0.8rem;
+    margin-bottom: 10px;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    padding: 4px 0;
+    border-bottom: 1px solid #C8C8C8;
+}
+
+.summary-row:last-child {
+    border-bottom: none;
+}

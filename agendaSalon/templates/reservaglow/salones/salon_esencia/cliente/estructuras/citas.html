@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mis Citas | Esencia - Centro de Estética</title>
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'E.ReservaGlow/estilos/esencia.css' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+ <header class="top-navbar">
+    <div class="logo-container">
+      <a href="{% url 'central'%}" title="Volver al inicio general" style="display: flex; align-items: center; text-decoration: none; color: inherit; margin-right: 15px;">
+        <i data-lucide="arrow-left" style="width: 20px; height: 20px;"></i>
+      </a>
+      <svg class="brand-flower-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/>
+        <path d="M12 22V10"/><path d="M12 15c-2.5 0-4.5-1.5-5.5-3"/><path d="M12 18c2.5 0 4.5-1.5 5.5-3"/>
+      </svg>
+      <div class="logo">
+        <span class="logo-title">Esencia</span>
+        <span class="logo-subtitle">CENTRO DE ESTÉTICA</span>
+      </div>
+    </div>
+    <nav class="nav-links">
+      <a href="{% url 'inicio'%}">Inicio</a>
+      <a href="{% url 'servicios'%}">Servicios</a>
+      <a href="{% url 'ubicacion'%}">Ubicación</a>
+      <a href="{% url 'escoger-cita'%}" class="active">Mis citas</a>
+    </nav>
+  </header>
+
+  <section class="section-container">
+    <div class="section-title">
+      <i data-lucide="calendar" class="title-icon"></i>
+      <div>
+        <h2>Mis Citas</h2>
+        <p class="subtitle-text">Consulta, gestiona y administra todas tus citas en un solo lugar</p>
+      </div>
+    </div>
+
+    <div class="citas-grid">
+      <!-- FORMULARIO DE BUSQUEDA -->
+      <div class="user-card-panel">
+        <div class="user-header">
+          <i data-lucide="user" class="user-icon"></i>
+          <div>
+            <h3>Ver o Agendar Cita</h3>
+            <p>Ingresa tus datos básicos para gestionar tus citas.</p>
+          </div>
+        </div>
+
+        <form class="user-form" onsubmit="event.preventDefault();">
+          <div class="form-group">
+            <label for="nombre">Nombre Completo</label>
+            <div class="input-with-icon">
+              <i data-lucide="user"></i>
+              <input type="text" id="nombre" name="nombre" placeholder="Ej: Valeria Gomez" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="email">Correo Electrónico</label>
+            <div class="input-with-icon">
+              <i data-lucide="mail"></i>
+              <input type="email" id="email" name="email" placeholder="Ej: valeriag@gmail.com" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="telefono">Teléfono</label>
+            <div class="input-with-icon">
+              <i data-lucide="phone"></i>
+              <input type="tel" id="telefono" name="telefono" placeholder="Ej: +57 3262567894" required>
+            </div>
+          </div>
+          
+          <button type="submit" class="btn-submit-citas">
+            <i data-lucide="search"></i> Buscar / Registrar Cita
+          </button>
+
+        
+          <div class="data-protection-msg">
+            <i data-lucide="shield-check"></i>
+            <span>Tus datos personales están protegidos y se usan exclusivamente para la gestión de tu reserva.</span>
+          </div>
+        </form>
+      </div>
+
+    
+      <div class="right-column-citas">
+        
+        <div class="agendas-panel">
+          <div class="agendas-header">
+            <div class="agendas-title">
+              <i data-lucide="calendar"></i>
+              <h3>Mis Citas Agendadas</h3>
+            </div>
+          </div>
+
+          <div class="cita-card status-proxima">
+            <div class="cita-body">
+              <div class="cita-icon-box"><i data-lucide="scissors"></i></div>
+              <div class="cita-details">
+                <span class="badge badge-green">Próxima Cita</span>
+                <h4>Corte & Peinado Premium</h4>
+                <p><strong>Fecha:</strong> 15 Jul 2026 - 10:30 AM</p>
+              </div>
+            </div>
+            <div class="cita-action">
+              <span class="status-tag status-confirmed">Confirmado</span>
+            </div>
+          </div>
+        </div>
+
+        
+        <div class="modify-cancel-box">
+          <div class="mc-header">
+            <i data-lucide="info"></i>
+            <h4>¿Necesitas modificar o cancelar tu cita?</h4>
+          </div>
+          <p>Puedes reprogramar o cancelar tu cita sin costo alguno con al menos <strong>24 horas de anticipación</strong>. Para cancelaciones de último minuto, comunícate directamente con nuestro centro de estética.</p>
+          <div class="mc-actions">
+            <button class="btn-mc-outline">Reprogramar</button>
+            <button class="btn-mc-danger">Cancelar Cita</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <script>lucide.createIcons();</script>
+</body>
+</html>

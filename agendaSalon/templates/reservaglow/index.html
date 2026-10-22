@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ReservaGlow | Encuentra y reserva tu estilo</title>
+
+  <!-- Corrección de ruta CSS según ubicación en tu proyecto -->
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'E.ReservaGlow/ReservaGlow.css' %}">
+
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+  <header class="rg-navbar">
+    <div class="rg-logo">
+      <i data-lucide="sparkles" class="logo-icon"></i>
+      <span>ReservaGlow</span>
+    </div>
+    <div class="rg-nav-actions">
+      <button onclick="toggleLoginModal()" class="rg-btn-outline">Iniciar Sesión</button>
+    </div>
+  </header>
+
+  <main class="rg-hero">
+    <div class="rg-hero-content">
+      <h1>Descubre y reserva en los mejores salones de belleza</h1>
+      <p>Peluquerías, barberías, spas y centros de estética a un clic de distancia. Tu tiempo, tu estilo.</p>
+      
+      <div class="rg-search-box">
+        <div class="search-input">
+          <i data-lucide="search"></i>
+          <input type="text" placeholder="¿Qué servicio buscas? (Ej: Corte, Manicura...)">
+        </div>
+        <div class="search-input location">
+          <i data-lucide="map-pin"></i>
+          <input type="text" placeholder="¿En qué ciudad? (Ej: Quibdó)">
+        </div>
+        <button class="rg-btn-search">Buscar Salón</button>
+      </div>
+    </div>
+  </main>
+
+  <section class="rg-salons-section">
+    <div class="section-header">
+      <h2>Salones Destacados</h2>
+      <p>Explora los centros de belleza mejor valorados por nuestra comunidad.</p>
+    </div>
+
+    <div class="rg-salons-grid">
+      <div class="salon-card">
+        <a href="{% url 'inicio'%}" class="salon-image-link">
+          <div class="salon-image">
+            <img src="https://images.unsplash.com/photo-1527799820374-dcf8d9d4a388?auto=format&fit=crop&q=80&w=600" alt="Esencia Centro de Estética">
+          </div>
+        </a>
+        <div class="salon-info">
+          <h3>Esencia Centro de Estética</h3>
+          <p class="salon-category"><i data-lucide="scissors"></i> Peluquería y Estética</p>
+          <div class="salon-rating">
+            <i data-lucide="star" class="star-filled"></i>
+            <span>4.9 (124 reseñas)</span>
+          </div>
+          <p class="salon-address"><i data-lucide="map-pin"></i> Zona Rosa, Quibdó</p>
+          
+          <a href="{% url 'inicio'%}"  class="rg-btn-visit">Ver Salón y Agendar</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Modal de Selección de Roles -->
+  <div id="loginModal" class="login-modal-overlay">
+    <div class="login-modal-content">
+      <div class="modal-header">
+        <h3>Selecciona tu Rol de Ingreso</h3>
+        <button onclick="toggleLoginModal()" class="close-modal">&times;</button>
+      </div>
+      <p class="modal-sub">Elige el panel al que deseas acceder:</p>
+      
+      <div class="role-options">
+        <!-- Panel Administrador -->
+        <a href="salones/salon_esencia/administrativos/admi.html" class="role-card admin">
+          <i data-lucide="shield-check"></i>
+          <div>
+            <h4>Administrador</h4>
+            <p>Control total del salón y métricas</p>
+          </div>
+        </a>
+
+        <!-- Panel Trabajador / Asistente -->
+        <a href="salones/salon_esencia/login_asistente.html" class="role-card">
+          <i data-lucide="user-check"></i>
+          <div>
+            <h4>Trabajador / Asistente</h4>
+            <p>Gestión de agenda y citas</p>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    function toggleLoginModal() {
+      const modal = document.getElementById('loginModal');
+      modal.classList.toggle('active');
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Servicios | Esencia - Centro de Estética</title>
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'E.ReservaGlow/estilos/esencia.css' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+  <header class="top-navbar">
+    <div class="logo-container">
+      <a href="../../../../index.html" title="Volver al inicio general" style="display: flex; align-items: center; text-decoration: none; color: inherit; margin-right: 15px;">
+        <i data-lucide="arrow-left" style="width: 20px; height: 20px;"></i>
+      </a>
+      <svg class="brand-flower-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/>
+        <path d="M12 22V10"/><path d="M12 15c-2.5 0-4.5-1.5-5.5-3"/><path d="M12 18c2.5 0 4.5-1.5 5.5-3"/>
+      </svg>
+      <div class="logo">
+        <span class="logo-title">Esencia</span>
+        <span class="logo-subtitle">CENTRO DE ESTÉTICA</span>
+      </div>
+    </div>
+    <nav class="nav-links">
+      <a href="{% url 'inicio'%}">Inicio</a>
+      <a href="{% url 'servicios'%}"class="active"></a>Servicios</a>
+      <a href="{% url 'ubicacion'%}">Ubicación</a>
+      <a href="{% url 'escoger-cita'%}" Mis citas</a>
+    </nav>
+  </header>
+
+  <section class="services-wrapper">
+    <div class="search-banner">
+      <h2>La belleza nace en tu esencia, nosotros la realzamos</h2>
+      <p>Reserva servicios de belleza y bienestar con los mejores especialistas.</p>
+      
+      <form class="search-input-wrapper" onsubmit="event.preventDefault();">
+        <input type="text" placeholder="¿Buscas algo en especial?..." />
+        <button class="search-btn" type="submit"><i data-lucide="arrow-right"></i></button>
+      </form>
+
+      <div class="category-pills">
+        <button class="pill-btn" type="button"><i data-lucide="scissors"></i> Peluquería</button>
+        <button class="pill-btn" type="button"><i data-lucide="sparkles"></i> Manicura</button>
+        <button class="pill-btn" type="button"><i data-lucide="smile"></i> Estética facial</button>
+        <button class="pill-btn" type="button"><i data-lucide="flower-2"></i> Masaje</button>
+      </div>
+    </div>
+
+    <div class="services-section">
+      <!-- LISTA DE SERVICIOS COMPLETA -->
+      <div class="services-list">
+        <div class="services-header">
+          <div>
+            <h2>Nuestros servicios</h2>
+            <p>Explora nuestra selección de servicios profesionales</p>
+          </div>
+          <select class="sort-select">
+            <option>Más populares</option>
+          </select>
+        </div>
+
+        
+        <div class="service-card">
+          <div class="card-img-container">
+            <img src="../../imagenes/herramientas_salon_belleza.jpg" alt="Corte De Cabello">
+          </div>
+          <div class="service-info">
+            <h3>Corte De Cabello</h3>
+            <p>Renueva tu estilo con un corte profesional y asesoría personalizada.</p>
+            <div class="service-meta">
+              <span><i data-lucide="clock"></i> 60 min</span>
+              <span><i data-lucide="star"></i> 4.5 (128)</span>
+            </div>
+          </div>
+          <div class="service-price-action">
+            <span class="service-price">$45.000</span>
+            <button class="btn-detail" type="button">Ver detalle</button>
+          </div>
+        </div>
+
+        <!-- Servicio 2 -->
+        <div class="service-card">
+          <div class="card-img-container">
+      
+            <img src="../../imagenes/Rectangle 26.jpg" alt="Manicura Clásica">
+          </div>
+          <div class="service-info">
+            <h3>Manicura Clásica</h3>
+            <p>Cuidado integral para tus manos y uñas con esmaltado tradicional o semipermanente.</p>
+            <div class="service-meta">
+              <span><i data-lucide="clock"></i> 45 min</span>
+              <span><i data-lucide="star"></i> 4.8 (95)</span>
+            </div>
+          </div>
+          <div class="service-price-action">
+            <span class="service-price">$35.000</span>
+            <button class="btn-detail" type="button">Ver detalle</button>
+          </div>
+        </div>
+
+        
+        <div class="service-card">
+          <div class="card-img-container">
+            <img src="../../imagenes/ima spa.jpeg" alt="Limpieza Facial">
+          </div>
+          <div class="service-info">
+            <h3>Limpieza Facial</h3>
+            <p>Tratamiento profundo para purificar, hidratar y revitalizar la piel de tu rostro.</p>
+            <div class="service-meta">
+              <span><i data-lucide="clock"></i> 90 min</span>
+              <span><i data-lucide="star"></i> 4.9 (112)</span>
+            </div>
+          </div>
+          <div class="service-price-action">
+            <span class="service-price">$80.000</span>
+            <button class="btn-detail" type="button">Ver detalle</button>
+          </div>
+        </div>
+
+        
+        <div class="service-card">
+          <div class="card-img-container">
+            <img src="../../imagenes/Rectangle 28.jpg" alt="Masaje Quita Estrés">
+          </div>
+          <div class="service-info">
+            <h3>Masaje Quita Estrés</h3>
+            <p>Terapia de relajación corporal diseñada para liberar tensiones musculares y estrés.</p>
+            <div class="service-meta">
+              <span><i data-lucide="clock"></i> 60 min</span>
+              <span><i data-lucide="star"></i> 4.7 (88)</span>
+            </div>
+          </div>
+          <div class="service-price-action">
+            <span class="service-price">$90.000</span>
+            <button class="btn-detail" type="button">Ver detalle</button>
+          </div>
+        </div>
+
+      </div>
+
+     
+      <aside class="booking-panel">
+        <form onsubmit="event.preventDefault();">
+          <div class="booking-step">
+            <div class="step-header">
+              <span class="step-circle">1</span>
+              <h4>Selecciona un estilista</h4>
+            </div>
+            <div class="specialists-list">
+              <label class="specialist-item">
+                <input type="radio" name="estilista" value="cualquiera" checked>
+                <div class="avatar-placeholder"><i data-lucide="user"></i></div>
+                <span>Cualquiera</span>
+              </label>
+              <label class="specialist-item">
+                <input type="radio" name="estilista" value="alex">
+                <img src="../../imagenes/ima2.jpg" alt="Alex P.">
+                <span>Alex P.</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="booking-step">
+            <div class="step-header">
+              <span class="step-circle">2</span>
+              <h4>Selecciona fecha y hora</h4>
+            </div>
+            <div class="calendar-and-time">
+              <div class="native-calendar-box">
+                <label for="fecha-cita">Fecha de tu cita:</label>
+                <input type="date" id="fecha-cita" name="fecha-cita" class="custom-date-picker">
+              </div>
+              <div class="time-slots">
+                <label class="time-option">
+                  <input type="radio" name="hora" value="9:00 AM">
+                  <span>9:00 AM</span>
+                </label>
+                <label class="time-option">
+                  <input type="radio" name="hora" value="10:00 AM" checked>
+                  <span>10:00 AM</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="booking-step">
+            <div class="step-header">
+              <span class="step-circle">3</span>
+              <h4>Confirma tu cita</h4>
+            </div>
+            <button class="btn-confirm-booking" type="submit">
+              Confirmar y Agendar Cita <i data-lucide="arrow-right-circle"></i>
+            </button>
+          </div>
+        </form>
+      </aside>
+    </div>
+  </section>
+
+  <script>lucide.createIcons();</script>
+</body>
+</html>

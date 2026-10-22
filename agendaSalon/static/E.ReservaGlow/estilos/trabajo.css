@@ -1,0 +1,583 @@
+/* ==========================================================================
+   1. RESET Y VARIABLES GLOBALES (Estilo ReservaGlow)
+   ========================================================================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif; /* Misma fuente de la página principal */
+}
+
+body {
+    background-color: #f8fafc; /* Fondo claro y moderno */
+    color: #0f172a; /* Color de texto principal */
+    padding: 20px;
+}
+
+/* ==========================================================================
+   2. CONTENEDORES PRINCIPALES Y BARRA SUPERIOR
+   ========================================================================== */
+.contenedor-principal {
+    max-width: 1200px;
+    margin: 0 auto;
+    background-color: #ffffff; /* Blanco limpio */
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05); /* Sombra suave */
+}
+
+.barra-superior {
+    background-color: #ffffff;
+    padding: 15px 25px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #e2e8f0; /* Borde sutil */
+}
+
+.seccion-bienvenida {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.avatar-bienvenida {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #2e7d32; /* Verde ReservaGlow */
+}
+
+.texto-bienvenida h2 {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.estado {
+    font-size: 14px;
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #64748b;
+}
+
+.punto-estado {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #2ecc71;
+}
+
+.fila-estadisticas {
+    display: flex;
+    gap: 20px;
+}
+
+.tarjeta-estadistica {
+    background-color: #f8fafc;
+    padding: 10px 15px;
+    border-radius: 12px;
+    text-align: center;
+    min-width: 110px;
+    border: 1px solid #e2e8f0;
+}
+
+.numero-dato {
+    font-weight: 700;
+    font-size: 16px;
+    margin-bottom: 2px;
+    color: #2e7d32;
+}
+
+.etiqueta-dato {
+    font-size: 12px;
+    color: #64748b;
+}
+
+.contenido-general {
+    display: flex;
+}
+
+/* ==========================================================================
+   3. MENÚ LATERAL
+   ========================================================================== */
+.menu-lateral {
+    width: 240px;
+    background-color: #f8fafc; /* Gris muy claro para diferenciar el menú */
+    padding: 20px 0;
+    border-right: 1px solid #e2e8f0;
+}
+
+.marca {
+    padding: 0 20px 25px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 20px;
+    font-weight: 700;
+    color: #2e7d32;
+}
+
+.imagen-marca {
+    height: 28px;
+    width: auto;
+    border-radius: 50%;
+}
+
+.subtitulo-marca {
+    font-size: 12px;
+    font-weight: 400;
+    color: #64748b;
+}
+
+.elemento-menu {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 20px;
+    cursor: pointer;
+    font-size: 15px;
+    color: #64748b;
+    transition: all 0.2s ease;
+}
+
+.elemento-menu.activo {
+    background-color: #f0fdf4;
+    border-left: 4px solid #2e7d32;
+    font-weight: 600;
+    color: #2e7d32;
+}
+
+.elemento-menu:hover:not(.activo) {
+    background-color: #e2e8f0;
+    color: #0f172a;
+}
+
+.area-usuario-lateral {
+    margin-top: 60px;
+    padding: 15px 20px;
+    border-top: 1px solid #e2e8f0;
+}
+
+.datos-usuario {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.avatar-usuario {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.nombre-usuario {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.cargo-usuario {
+    font-size: 12px;
+    color: #64748b;
+}
+
+.cerrar-sesion {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #ef4444; /* Rojo suave para acción de cerrar */
+    cursor: pointer;
+    padding-top: 8px;
+    font-weight: 500;
+}
+
+/* ==========================================================================
+   4. ÁREA PRINCIPAL Y PERFIL
+   ========================================================================== */
+.area-principal {
+    flex: 1;
+    padding: 25px;
+    background-color: #ffffff;
+}
+
+.cabecera-perfil {
+    background-color: #f8fafc;
+    padding: 18px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    border: 1px solid #e2e8f0;
+}
+
+.avatar-perfil {
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #2e7d32;
+}
+
+.informacion-perfil h3 {
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.cargo-perfil {
+    font-size: 14px;
+    margin: 5px 0;
+    color: #64748b;
+}
+
+.antiguedad-perfil {
+    font-size: 13px;
+    color: #94a3b8;
+}
+
+.etiqueta-disponible {
+    margin-left: auto;
+    background-color: #2e7d32;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.cuadricula-perfil {
+    display: grid;
+    grid-template-columns: 1fr 1fr 280px;
+    gap: 20px;
+}
+
+/* Formularios */
+.columna-datos .grupo-formulario {
+    margin-bottom: 18px;
+}
+
+.grupo-formulario label {
+    display: block;
+    font-size: 13px;
+    margin-bottom: 6px;
+    color: #64748b;
+    font-weight: 600;
+}
+
+.grupo-formulario input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background-color: #f8fafc;
+    color: #0f172a;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.grupo-formulario input:focus {
+    outline: none;
+    border-color: #2e7d32;
+    box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.2);
+    background-color: #ffffff;
+}
+
+/* ==========================================================================
+   5. TARJETAS Y ESPECIALIDADES
+   ========================================================================== */
+.columna-especialidades {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.tarjeta-seccion, .tarjeta-aviso, .tarjeta-alertas {
+    background-color: #ffffff;
+    padding: 18px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.titulo-seccion {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #e2e8f0;
+    color: #0f172a;
+}
+
+.contenedor-etiquetas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 25px;
+}
+
+.etiqueta {
+    background-color: #f0fdf4;
+    color: #2e7d32;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    border: 1px solid #bbf7d0;
+    font-weight: 500;
+}
+
+.horario {
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    color: #64748b;
+}
+
+/* Botones de acción */
+.contenedor-botones {
+    display: flex;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.boton {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.boton-cancelar {
+    background-color: #f1f5f9;
+    color: #0f172a;
+    border: 1px solid #e2e8f0;
+}
+
+.boton-cancelar:hover {
+    background-color: #e2e8f0;
+}
+
+.boton-guardar {
+    background-color: #2e7d32;
+    color: white;
+}
+
+.boton-guardar:hover {
+    background-color: #1b5e20;
+}
+
+/* ==========================================================================
+   6. PANEL DERECHO (AVISOS Y ALERTAS)
+   ========================================================================== */
+.panel-derecho {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.encabezado-tarjeta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.encabezado-tarjeta h4 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.ver-todo {
+    font-size: 12px;
+    color: #2e7d32;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.texto-aviso {
+    font-size: 13px;
+    line-height: 1.5;
+    color: #64748b;
+}
+
+.texto-aviso strong {
+    color: #0f172a;
+}
+
+.autor-aviso {
+    font-size: 12px;
+    margin-top: 8px;
+    color: #94a3b8;
+    font-style: italic;
+}
+
+.elemento-alerta {
+    display: flex;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 13px;
+    color: #0f172a;
+}
+
+.elemento-alerta:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.icono-alerta {
+    color: #2e7d32;
+    margin-top: 2px;
+}
+
+.indicador-alerta {
+    margin-left: auto;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #2e7d32;
+}
+
+.tiempo-alerta {
+    font-size: 11px;
+    color: #94a3b8;
+    margin-top: 4px;
+}
+
+/* ==========================================================================
+   7. AGENDA, CLIENTES Y TABLAS (Elementos extras)
+   ========================================================================== */
+.horario-agenda {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.fila-hora {
+    padding: 8px 12px;
+    color: #64748b;
+    font-weight: 500;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.cita {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+
+.cita.completada {
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+}
+
+.cita.en-progreso {
+    background-color: #f0fdf4;
+    border: 1px solid #2e7d32;
+}
+
+.cliente-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+}
+
+.cliente-item.activo {
+    background: #2e7d32;
+    color: white;
+    border-color: #2e7d32;
+}
+
+.etiqueta-cliente {
+    display: inline-block;
+    padding: 4px 10px;
+    background: #f1f5f9;
+    color: #0f172a;
+    border-radius: 12px;
+    font-size: 12px;
+    margin: 4px 0;
+    font-weight: 500;
+}
+
+.info-cliente p {
+    padding: 6px 0;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.tabla-historial {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.tabla-historial th, .tabla-historial td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 14px;
+}
+
+.tabla-historial th {
+    background: #f8fafc;
+    color: #64748b;
+    font-weight: 600;
+}
+
+.etiqueta-estado {
+    padding: 4px 10px;
+    background: #2e7d32;
+    color: white;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.paginado {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+    color: #64748b;
+    font-size: 14px;
+}
+
+/* ==========================================================================
+   8. BOTÓN DE NAVEGACIÓN GLOBAL
+   ========================================================================== */
+.btn-volver {
+  display: inline-block;
+  margin: 15px 20px;
+  padding: 10px 18px;
+  background-color: #2e7d32;
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+}
+
+.btn-volver:hover {
+  background-color: #1b5e20;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}

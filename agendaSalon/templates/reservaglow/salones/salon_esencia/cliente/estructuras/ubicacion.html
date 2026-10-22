@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ubicación | Esencia - Centro de Estética</title>
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'E.ReservaGlow/estilos/esencia.css' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+  <header class="top-navbar">
+    <div class="logo-container">
+      <a href="../../../../index.html" title="Volver al inicio general" style="display: flex; align-items: center; text-decoration: none; color: inherit; margin-right: 15px;">
+        <i data-lucide="arrow-left" style="width: 20px; height: 20px;"></i>
+      </a>
+      <svg class="brand-flower-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/>
+        <path d="M12 22V10"/><path d="M12 15c-2.5 0-4.5-1.5-5.5-3"/><path d="M12 18c2.5 0 4.5-1.5 5.5-3"/>
+      </svg>
+      <div class="logo">
+        <span class="logo-title">Esencia</span>
+        <span class="logo-subtitle">CENTRO DE ESTÉTICA</span>
+      </div>
+    </div>
+    <nav class="nav-links">
+      <a href="{% url 'inicio'%}" >Inicio</a>
+      <a href="{% url 'servicios'%}">Servicios</a>
+      <a href="{% url 'ubicacion'%}"class="active">Ubicación</a>
+      <a href="{% url 'escoger-cita'%}" >Mis citas</a>
+    </nav>
+  </header>
+
+  <section class="section-container">
+    <div class="section-title">
+      <i data-lucide="map-pin" class="title-icon"></i>
+      <h2>Ubicación</h2>
+    </div>
+
+    <div class="location-grid">
+      
+      <!-- Lista de sucursales con imagen enlazada a Google Maps -->
+      <div class="branches-list">
+        <div class="branch-card-horizontal">
+          <div class="branch-info">
+            <h3>Esencia Centro de Estética</h3>
+            <p><i data-lucide="map-pin"></i> Carrera 1ra # 25-14, Centro Comercial Quibdó</p>
+            <p><i data-lucide="phone"></i> +57 3126352539</p>
+            <p><i data-lucide="clock"></i> 08:30AM - 05:30PM</p>
+            <p style="margin-top: 10px; font-size: 0.85rem; color: var(--accent-color, #2d6a4f);">
+              <em>Haz clic en la imagen para ver la ruta en Google Maps</em>
+            </p>
+          </div>
+          <div class="branch-img-horizontal">
+            <!-- Enlace que abre Google Maps para mostrar la ubicación y calcular la ruta -->
+            <a href="https://www.google.com/maps/search/?api=1&query=Quibdo+Choco" target="_blank" title="Abrir ubicación y ruta en Google Maps">
+              <img src="../../imagenes/image 4.jpg" alt="Sede Principal Esencia Quibdó" style="cursor: pointer; transition: transform 0.3s ease;" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'">
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mapa interactivo integrado enfocado en el centro de Quibdó -->
+      <div class="map-wrapper">
+        <iframe class="realtime-map" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3972.350849208745!2d-76.6585!3d5.6920!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8e470f5923b7b51f%3A0x8e470f5923b7b51f!2sQuibd%C3%B3%2C%20Choc%C3%B3!5e0!3m2!1ses!2sco!4v1680000000000!5m2!1ses!2sco" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      </div>
+    </div>
+  </section>
+
+  <script>lucide.createIcons();</script>
+</body>
+</html>
