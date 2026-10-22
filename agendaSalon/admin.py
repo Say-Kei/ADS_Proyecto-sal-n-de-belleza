@@ -203,29 +203,53 @@ class SalonAdminMixin:
             readonly += [f for f in self.readonly_para_no_superadmin if f not in readonly]
         return readonly
  
- 
 
+# ------------------------------------------------------------------------------
+# DEFINICIÓN DE INLINES
+# ------------------------------------------------------------------------------
+
+class HorarioEstablecimientoInline(admin.TabularInline):
+    model = HorarioEstablecimiento
+    extra = 1
+    verbose_name = _('Horario de atención')
+    verbose_name_plural = _('Horarios del establecimiento')
+
+class PerfilUsuarioInline(admin.StackedInline):
+    model = PerfilUsuario
+    extra = 1
+    fk_name = 'establecimientof'
+    verbose_name = _('Personal / Administrador')
+    verbose_name_plural = _('Personal y Administradores asociados')
+
+class HorarioTrabajadorInline(admin.TabularInline):
+    model = HorarioTrabajador
+    extra = 1
+    verbose_name = _('Horario del trabajador')
+    verbose_name_plural = _('Horarios del trabajador')
+
+
+# ------------------------------------------------------------------------------
 # 4. UN ModelAdmin POR MODELO
-
-# @admin.register(Modelo) = "muestra este modelo en el panel con esta configuración".
-# Todos heredan de SalonAdminMixin para aplicar las reglas de permissions.py.
+# ------------------------------------------------------------------------------
 
 # ESTABLECIMIENTO  (Superadmin: alta/baja | Admin: edita los datos de SU local)
 
 @admin.register(Establecimiento)
 class EstablecimientoAdmin(SalonAdminMixin, admin.ModelAdmin):
     list_display = ('nombre', 'nit', 'telefono', 'correo', 'ciudad', 'estado')   # columnas de la lista
-    search_fields = ('nombre', 'nit', 'correo', 'telefono', 'codigo_unico')       # buscador
-    list_filter = ('estado', 'ciudad')                                            # filtros laterales
+    search_fields = ('nombre', 'nit', 'correo', 'telefono', 'codigo_unico')      # buscador
+    list_filter = ('estado', 'ciudad')                                          # filtros laterales
     # `estado` es de solo lectura A PROPÓSITO: no se cambia con la casilla, sino
     # con las acciones de abajo, para que la inactivación en cascada 
     readonly_fields = ('estado', 'slug', 'codigo_unico', 'creado_en')
     # Datos legales/identidad: solo el Superadmin los puede cambiar.
     readonly_para_no_superadmin = ('nit', 'razon_social', 'nombre')
     actions = ['activar_establecimientos', 'desactivar_establecimientos']
+    
+    # Inlines para registrar el establecimiento junto a su horario y personal de una vez
+    inlines = [HorarioEstablecimientoInline, PerfilUsuarioInline]
 
     def has_gestionar_ciclo_vida_permission(self, request):
-
         return tiene_permiso_especial(request.user, 'gestionar_ciclo_de_establecimiento')
 
     @admin.action(description=_('Activar establecimientos seleccionados'),
@@ -314,6 +338,10 @@ class PerfilUsuarioAdmin(SalonAdminMixin, admin.ModelAdmin):
                      'usuariof__email', 'nombre_establecimiento', 'codigo_unico')
     # Trae el usuario y el salón en la MISMA consulta SQL (más rápido que una por fila).
     list_select_related = ('usuariof', 'establecimientof')
+    
+    # Inline del horario del trabajador
+    inlines = [HorarioTrabajadorInline]
+
     fieldsets_creacion = (
         (_('Cuenta de acceso'), {'fields': ('username', 'email', 'first_name', 'last_name',
                                             'password1', 'password2')}),
@@ -476,7 +504,6 @@ class CitaAdminForm(forms.ModelForm):
                             _("%(t)s no está capacitado para el servicio '%(s)s'.") % {'t': t, 's': s.nombre})
 
         # ---- FECHA Y HORARIO (usa CitaService y FechaCita de services.py) ----
-                # ---- FECHA Y HORARIO (usa CitaService y FechaCita de services.py) ----
         fecha = cleaned.get('fecha_cita')
         hora = cleaned.get('hora_inicio')
         estado = cleaned.get('estado')
@@ -599,13 +626,13 @@ class CitaAdmin(SalonAdminMixin, admin.ModelAdmin):
             # .update() escribe directo en la BD sin volver a ejecutar save().
             Cita.objects.filter(pk=cita.pk).update(nombre_establecimiento=nombre)
  
- 
 
 # FACTURACIÓN (cobranza manual: Asistente y Admin)
 
 @admin.register(Factura)
 class FacturaAdmin(SalonAdminMixin, admin.ModelAdmin):
     list_display = ('numero_factura', 'citaf', 'metodo_pago', 'total_general', 'pagada', 'fecha_emision')
+    list_editable = ('pagada',) # Permite marcar el pago completado directamente desde la lista de facturas
     list_filter = ('pagada', 'metodo_pago', 'fecha_emision')
     search_fields = ('numero_factura', 'citaf__nombre_cliente', 'citaf__codigo_unico')
     # Los montos los calcula el sistema a partir de los servicios de la cita: nadie los escribe a mano.
