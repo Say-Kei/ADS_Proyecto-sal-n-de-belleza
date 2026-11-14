@@ -29,8 +29,8 @@ PERMISOS_POR_ROL = {
         'horarioestablecimiento': {VER, AGREGAR, CAMBIAR},
         'horariotrabajador': {VER, AGREGAR, CAMBIAR},
         'cita': {VER, AGREGAR, CAMBIAR},
-        'factura': {VER, AGREGAR, CAMBIAR},
-        'facturadetalle': {VER, AGREGAR, CAMBIAR},
+        'factura': {VER},
+        'facturadetalle': {VER},
         'resena': {VER, AGREGAR, CAMBIAR},
     },
     Rol.ADMIN_NEGOCIO: {
@@ -41,8 +41,8 @@ PERMISOS_POR_ROL = {
         'horarioestablecimiento': {VER, AGREGAR, CAMBIAR},
         'horariotrabajador': {VER, AGREGAR, CAMBIAR},
         'cita': {VER, AGREGAR, CAMBIAR},
-        'factura': {VER, AGREGAR, CAMBIAR},
-        'facturadetalle': {VER, AGREGAR, CAMBIAR},
+        'factura': {VER},
+        'facturadetalle': {VER},
         'resena': {VER, AGREGAR, CAMBIAR},
     },
     Rol.ASISTENTE: {
@@ -53,8 +53,8 @@ PERMISOS_POR_ROL = {
         'horarioestablecimiento': {VER},
         'horariotrabajador': {VER},
         'cita': {VER, AGREGAR, CAMBIAR},
-        'factura': {VER, AGREGAR, CAMBIAR},
-        'facturadetalle': {VER, AGREGAR, CAMBIAR},
+        'factura': {VER},
+        'facturadetalle': {VER},
         'resena': {VER, AGREGAR, CAMBIAR},
     },
     Rol.TRABAJADOR: {
@@ -95,9 +95,6 @@ def obtener_rol(user):
     if perfil is None or not perfil.estado:
         return None
 
-    # El Superadmin no tiene salón (None). Si SÍ tiene salón y está inactivo,
-    # se le corta el acceso (RN-11). Antes decía `is None and not ...estado`,
-    # que da error cuando no hay salón y nunca bloqueaba un salón inactivo.
     establecimiento = perfil.establecimientof
     if establecimiento is not None and not establecimiento.estado:
         return None

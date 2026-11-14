@@ -31,21 +31,9 @@ from .permissions import (
     obtener_rol,
 )
 
-class AuthService:
-    """
-    Todo lo relacionado con AUTENTICACIÓN (RF-01, RNF-03):
-    iniciar sesión, registrar personal y cerrar sesión. El cliente NO se autentica.
- 
-    Se usan tokens JWT: al iniciar sesión el sistema entrega dos "pases":
-      - access:  dura poco; se envía en cada petición para identificarse.
-      - refresh: dura más; sirve para pedir un access nuevo sin volver a escribir la clave.
-    """
- 
+class AuthService: 
     @staticmethod
     def auenticar_generar_tokens(username_o_email: str, password: str) -> dict:
-        """Valida las credenciales y devuelve los tokens y los datos del usuario."""
-        # Permite iniciar sesión con el usuario O con el correo.
-        # Si lo escrito tiene '@', buscamos el usuario dueño de ese correo.
         username = username_o_email
         if '@' in username_o_email:
             user_obj = User.objects.filter(email__iexact=username_o_email).first()

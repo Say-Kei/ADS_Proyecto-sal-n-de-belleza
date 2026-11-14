@@ -177,10 +177,11 @@ class HorarioEstablecimiento(models.Model):
     hora_cierre = models.TimeField(blank=True, null=True)
     cerrado = models.BooleanField(default=False)
     objects=models.Manager()
+    activo=models.BooleanField(default=True)
 
     class Meta:
         db_table = 'horario_establecimiento'
-        unique_together = ('establecimientof', 'dia_semana')
+        unique_together = ('establecimientof')
 
     def __str__(self):
         cerrado_val = getattr(self, 'cerrado', False)
@@ -291,21 +292,19 @@ class Cita(models.Model):
     )
 
     id_cita = models.AutoField(primary_key=True)
-    serviciof = models.ManyToManyField(
-    Servicio, 
-    related_name='fcitas',blank=False, verbose_name='Servicio'
-)
-    trabajadorf = models.ManyToManyField(PerfilUsuario, related_name='fcitas_asignadas', blank=False, verbose_name='Trabajador')
+    nombre_establecimientof = models.ForeignKey(Establecimiento, on_delete=models.CASCADE, db_column='id_establecimiento', related_name='fcitas', verbose_name='Establecimiento')
     nombre_establecimiento = models.CharField(max_length=150, blank=True, null=True, editable=False)
     nombre_cliente = models.CharField(max_length=120)
     correo_cliente = models.EmailField()
     telefono_cliente = models.CharField(max_length=20)
-    fecha_cita = models.DateField()
-    hora_inicio = models.TimeField()
+
     estado = models.CharField(max_length=20, choices=ESTADOS, default='PENDIENTE')
-    fecha_expiracion = models.DateTimeField(null=True, blank=True, help_text="Límite de 7 minutos para pago de anticipo")
+    
     nota = models.TextField(blank=True, null=True)
+
+    fecha_expiracion = models.DateTimeField(null=True, blank=True, help_text="Límite de 7 minutos para pago de anticipo")
     creado_el = models.DateTimeField(auto_now_add=True)
+    ultima_actualizacion = models.DateTimeField(auto_now=True)
     codigo_unico = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     estadocita=models.BooleanField(default=True)
     objects = models.Manager()
@@ -334,67 +333,75 @@ class Cita(models.Model):
             estadocita
         )
 
-    @property
-    def duracion_total(self):
-        """Suma de minutos de TODOS los servicios de la cita."""
-        if not self.pk:
-            return 0
-        return self.serviciof.aggregate(total=Sum('duracion_minutos'))['total'] or 0
+    def calcular_fecha_expiracion(self):
+        if not self.pk and self.estado == 'PENDIENTE' and not self.fecha_expiracion:
+            self.fecha_expiracion = timezone.now() + timedelta(minutes=7)
+
+    def establecimiento_asociado(self):
+        est = getattr(self, 'nombre_establecimientof', None)
+        if est:
+            self.nombre_establecimiento = getattr(est, 'nombre', '')
+
+    def save(self, *args, **kwargs):
+        self.establecimiento_asociado()
+        # Solo al CREAR la cita (no al editarla), si está pendiente y no trae fecha:
+        self.calcular_fecha_expiracion()
+        super().save(*args, **kwargs)
+
+class DetallesCita(models.Model):
+    id_detalle = models.AutoField(primary_key=True)
+    serviciof = models.ForeignKey(Servicio, on_delete=models.CASCADE, db_column='id_servicio', related_name='fdetalles', verbose_name='Servicio')
+    trabajador = models.CharField(max_length=150, blank=True, null=True, verbose_name='Nombre del Trabajador')
+    establecimiento=models.CharField(verbose_name='Nombre establecimiento')
+    fecha_cita = models.DateField()
+    hora_inicio = models.TimeField()
+    hora_fin_ = models.TimeField(blank=True, null=True)
+    duracion_minutos = models.IntegerField(help_text="Duración estimada en minutos")
+
+    citaf = models.ForeignKey('Cita', on_delete=models.CASCADE, db_column='id_cita', related_name='fdetalles', verbose_name='Cita')
+    detalles_facturaf =models.ForeignKey('FacturaDetalle', on_delete=models.SET_NULL, db_column='id_detalle_factura', related_name='fdetalles_cita', verbose_name='Detalle de Factura', blank=True, null=True)
+    class Meta:
+        db_table = 'detalles_cita'
+        unique_together = ('citaf', 'serviciof', 'trabajadorf', 'fecha_cita', 'hora_inicio')
+
+    def traer_trabajador(self):
+        servicio = getattr(self, 'serviciof', None)
+        trabajador = getattr(servicio, 'trabajadorf', None) if servicio else None
+        if trabajador:
+            self.trabajador = getattr(trabajador, 'nombre', '')
+
+    def traer_tiempo_duracion(self):
+        servicio = getattr(self, 'serviciof', None)
+        tiempo = getattr(servicio, 'duracion_minutos', 0) if servicio else 0
+        self.duracion_minutos = tiempo
+
+    def validar_y_traer_establecimiento(self):
+        servicio = getattr(self, 'serviciof', None)
+        cita=getattr(self, 'citaf', None)
+        est = getattr(cita, 'nombre_establecimientof', None) if cita else None
+        servicio_cate = getattr(servicio, 'categoriaf', None) if servicio else None
+        categoria_est = getattr(servicio_cate, 'establecimientof', None) if servicio_cate else None
+        if est and categoria_est:
+            self.establecimiento = getattr(categoria_est, 'nombre', '')
+
+    def hora_fin_calculada(self):
+        if self.hora_inicio and self.fecha_cita and self.duracion_minutos:
+            inicio_dt = datetime.combine(self.fecha_cita, self.hora_inicio)
+            return (inicio_dt + timedelta(minutes=self.duracion_minutos)).time()
+
+    def save(self, *args, **kwargs):
+        self.traer_trabajador()
+        self.traer_tiempo_duracion()
+        self.validar_y_traer_establecimiento()
+        self.hora_fin_ = self.hora_fin_calculada()
+        super().save(*args, **kwargs)
 
     @property
     def hora_fin(self):
-        if self.hora_inicio and self.fecha_cita and self.duracion_total:
+        if self.hora_inicio and self.fecha_cita and self.duracion_minutos:
             inicio_dt = datetime.combine(self.fecha_cita, self.hora_inicio)
-            return (inicio_dt + timedelta(minutes=self.duracion_total)).time()
+            return (inicio_dt + timedelta(minutes=self.duracion_minutos)).time()
         return None
-
-    @property
-    def precio_servicio(self):
-        """Suma de precios de TODOS los servicios de la cita."""
-        if not self.pk:
-            return Decimal('0.00')
-        return self.serviciof.aggregate(total=Sum('precio'))['total'] or Decimal('0.00')
-
-    def save(self, *args, **kwargs):
-        # Solo al CREAR la cita (no al editarla), si está pendiente y no trae fecha:
-        if self._state.adding and self.estado == 'PENDIENTE' and not self.fecha_expiracion:
-            self.fecha_expiracion = timezone.now() + timedelta(minutes=7)
-        super().save(*args, **kwargs)
-    @property
-    def rango_horario_formateado(self):
-        """Devuelve el rango de horario formateado en formato 12 horas (ej: 08:00 AM - 05:00 PM)."""
-        h_ini = getattr(self, 'hora_inicio', None)
-        h_fin = getattr(self, 'hora_fin', None)
-
-        if hasattr(h_ini, 'strftime') and hasattr(h_fin, 'strftime'):
-            # pylint: disable=no-member
-            return f"{h_ini.strftime('%I:%M %p')} - {h_fin.strftime('%I:%M %p')}"
-        return ""
-
-    @property
-    def valor_anticipo_30(self):
-        return self.precio_servicio * Decimal('0.30')
-
-    @property
-    def valor_restante_70(self):
-        return self.precio_servicio * Decimal('0.70')
-
-
-
-# 8. RESEÑA
-class Resena(models.Model):
-    id_resena = models.AutoField(primary_key=True)
-    citaf = models.OneToOneField(Cita, on_delete=models.CASCADE, db_column='id_cita', related_name='fresena')
-    nombre_establecimiento = models.CharField(max_length=150, blank=True, null=True, editable=False)
-    calificacion = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
-    comentario = models.TextField(blank=True, null=True)
-    fecha = models.DateTimeField(auto_now_add=True)
-    estado = models.BooleanField(default=True)
-    objects=models.Manager()
-
-    class Meta:
-        db_table = 'resena'
-
 
 # 9. FACTURA
 class Factura(models.Model):
@@ -403,9 +410,14 @@ class Factura(models.Model):
         ('TRANSFERENCIA', 'Transferencia / Bre-B / Nequi / Daviplata'),
         ('TARJETA', 'Tarjeta Crédito / Débito'),
     )
+    ESTADOS_PAGO = (
+        ('PENDIENTE_ANTICIPO', 'Pendiente de Anticipo 30%'),
+        ('ANTICIPO_PAGADO', 'Anticipo Pagado (Parcial)'),
+        ('PAGADA', 'Pagada en su Totalidad'),
+    )
 
     id_factura = models.AutoField(primary_key=True)
-    citaf = models.OneToOneField(Cita, on_delete=models.CASCADE, db_column='id_cita', related_name='ffactura')
+    citaf = models.ForeignKey(Cita, on_delete=models.CASCADE, db_column='id_cita', related_name='ffacturas')
     nombre_establecimiento = models.CharField(max_length=150, blank=True, null=True, editable=False)
     numero_factura = models.CharField(max_length=50, unique=True, blank=True, editable=False)
 
@@ -418,7 +430,7 @@ class Factura(models.Model):
     metodo_pago = models.CharField(max_length=20, choices=METODOS_PAGO, default='EFECTIVO')
     pagada = models.BooleanField(default=False)
     fecha_emision = models.DateTimeField(auto_now_add=True)
-    estado = models.BooleanField(default=True)
+    estadodepago = models.CharField(max_length=30, choices=ESTADOS_PAGO, default='PENDIENTE_ANTICIPO')
     objects=models.Manager()
 
     class Meta:
@@ -429,15 +441,10 @@ class Factura(models.Model):
             self.numero_factura = f"FAC-{uuid.uuid4().hex[:8].upper()}"
         super().save(*args, **kwargs)
 
-
 # 10. DETALLE DE FACTURA
 class FacturaDetalle(models.Model):
     id_detalle = models.AutoField(primary_key=True)
     facturaf = models.ForeignKey(Factura, on_delete=models.CASCADE, db_column='id_factura', related_name='fdetalles')
-    descripcion_item = models.CharField(max_length=200)
-    cantidad = models.IntegerField(default=1)
-    valor_unitario = models.DecimalField(max_digits=12, decimal_places=2, validators=[MinValueValidator(Decimal('0.00'))])
-    subtotal_item = models.DecimalField(max_digits=12, decimal_places=2, validators=[MinValueValidator(Decimal('0.00'))])
     estado = models.BooleanField(default=True)
     objects=models.Manager()
 
