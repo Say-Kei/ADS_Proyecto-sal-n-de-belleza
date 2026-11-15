@@ -357,6 +357,8 @@ class DetallesCita(models.Model):
     hora_inicio = models.TimeField()
     hora_fin_ = models.TimeField(blank=True, null=True)
     duracion_minutos = models.IntegerField(help_text="Duración estimada en minutos")
+    activo = models.BooleanField(default=True)
+    objects=models.Manager()
 
     citaf = models.ForeignKey('Cita', on_delete=models.CASCADE, db_column='id_cita', related_name='fdetalles', verbose_name='Cita')
     detalles_facturaf =models.ForeignKey('FacturaDetalle', on_delete=models.SET_NULL, db_column='id_detalle_factura', related_name='fdetalles_cita', verbose_name='Detalle de Factura', blank=True, null=True)
@@ -417,13 +419,10 @@ class Factura(models.Model):
     )
 
     id_factura = models.AutoField(primary_key=True)
-    citaf = models.ForeignKey(Cita, on_delete=models.CASCADE, db_column='id_cita', related_name='ffacturas')
+    cita = models.CharField(max_length=36, blank=True, null=True, editable=False)  # UUID de la cita asociada
     nombre_establecimiento = models.CharField(max_length=150, blank=True, null=True, editable=False)
     numero_factura = models.CharField(max_length=50, unique=True, blank=True, editable=False)
 
-    monto_anticipo_30 = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, validators=[MinValueValidator(Decimal('0.00'))])
-    monto_restante_70 = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, validators=[MinValueValidator(Decimal('0.00'))])
-    subtotal = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, validators=[MinValueValidator(Decimal('0.00'))])
     total_impuestos = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, validators=[MinValueValidator(Decimal('0.00'))])
     total_general = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, validators=[MinValueValidator(Decimal('0.00'))])
     
@@ -436,17 +435,42 @@ class Factura(models.Model):
     class Meta:
         db_table = 'factura'
 
-    def save(self, *args, **kwargs):
-        if not getattr(self, 'numero_factura', None):
+    def traer_uuid_cita(self):
+        cita = getattr(self, 'citaf', None)
+        if cita:
+            self.cita = str(getattr(cita, 'codigo_unico', ''))
+
+    def crear_numero_factura(self):
+        if not self.numero_factura:
             self.numero_factura = f"FAC-{uuid.uuid4().hex[:8].upper()}"
+
+    def nombre_establecimiento_asociado(self):
+        cita = getattr(self, 'citaf', None)
+        if cita:
+            est = getattr(cita, 'nombre_establecimientof', None)
+            if est:
+                self.nombre_establecimiento = getattr(est, 'nombre', '')
+
+    def save(self, *args, **kwargs):
+        self.traer_uuid_cita()
+        self.crear_numero_factura()
+        self.nombre_establecimiento_asociado()
+
         super().save(*args, **kwargs)
 
 # 10. DETALLE DE FACTURA
 class FacturaDetalle(models.Model):
     id_detalle = models.AutoField(primary_key=True)
     facturaf = models.ForeignKey(Factura, on_delete=models.CASCADE, db_column='id_factura', related_name='fdetalles')
+
+    monto_anticipo_30 = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, validators=[MinValueValidator(Decimal('0.00'))])
+    monto_restante_70 = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, validators=[MinValueValidator(Decimal('0.00'))])
+    subtotal = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, validators=[MinValueValidator(Decimal('0.00'))])
+
     estado = models.BooleanField(default=True)
     objects=models.Manager()
 
     class Meta:
         db_table = 'factura_detalle'
+
+    def 
