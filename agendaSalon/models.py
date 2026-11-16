@@ -352,7 +352,7 @@ class DetallesCita(models.Model):
     id_detalle = models.AutoField(primary_key=True)
     serviciof = models.ForeignKey(Servicio, on_delete=models.CASCADE, db_column='id_servicio', related_name='fdetalles', verbose_name='Servicio')
     trabajador = models.CharField(max_length=150, blank=True, null=True, verbose_name='Nombre del Trabajador')
-    establecimiento=models.CharField(verbose_name='Nombre establecimiento')
+    establecimiento = models.CharField(max_length=150, verbose_name='Nombre establecimiento')
     fecha_cita = models.DateField()
     hora_inicio = models.TimeField()
     hora_fin_ = models.TimeField(blank=True, null=True)
@@ -364,7 +364,7 @@ class DetallesCita(models.Model):
     detalles_facturaf =models.ForeignKey('FacturaDetalle', on_delete=models.SET_NULL, db_column='id_detalle_factura', related_name='fdetalles_cita', verbose_name='Detalle de Factura', blank=True, null=True)
     class Meta:
         db_table = 'detalles_cita'
-        unique_together = ('citaf', 'serviciof', 'trabajadorf', 'fecha_cita', 'hora_inicio')
+        unique_together = ('citaf', 'serviciof', 'trabajador', 'fecha_cita', 'hora_inicio')
 
     def traer_trabajador(self):
         servicio = getattr(self, 'serviciof', None)
@@ -407,11 +407,7 @@ class DetallesCita(models.Model):
 
 # 9. FACTURA
 class Factura(models.Model):
-    METODOS_PAGO = (
-        ('EFECTIVO', 'Efectivo en local'),
-        ('TRANSFERENCIA', 'Transferencia / Bre-B / Nequi / Daviplata'),
-        ('TARJETA', 'Tarjeta Crédito / Débito'),
-    )
+    
     ESTADOS_PAGO = (
         ('PENDIENTE_ANTICIPO', 'Pendiente de Anticipo 30%'),
         ('ANTICIPO_PAGADO', 'Anticipo Pagado (Parcial)'),
@@ -423,10 +419,10 @@ class Factura(models.Model):
     nombre_establecimiento = models.CharField(max_length=150, blank=True, null=True, editable=False)
     numero_factura = models.CharField(max_length=50, unique=True, blank=True, editable=False)
 
-    total_impuestos = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, validators=[MinValueValidator(Decimal('0.00'))])
+    impuesto = models.DecimalField(max_digits=12, decimal_places=2, default=0.19, validators=[MinValueValidator(Decimal('0.00'))])
     total_general = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, validators=[MinValueValidator(Decimal('0.00'))])
     
-    metodo_pago = models.CharField(max_length=20, choices=METODOS_PAGO, default='EFECTIVO')
+    
     pagada = models.BooleanField(default=False)
     fecha_emision = models.DateTimeField(auto_now_add=True)
     estadodepago = models.CharField(max_length=30, choices=ESTADOS_PAGO, default='PENDIENTE_ANTICIPO')
@@ -451,26 +447,61 @@ class Factura(models.Model):
             if est:
                 self.nombre_establecimiento = getattr(est, 'nombre', '')
 
+    def total_general_calculado(self):
+        detalle= getattr(self, 'fdetalles', None)
+        if detalle:
+            self.total_general = getattr(detalle, 'subtotal', Decimal('0.00'))
+
+
     def save(self, *args, **kwargs):
         self.traer_uuid_cita()
         self.crear_numero_factura()
         self.nombre_establecimiento_asociado()
-
+        self.total_general_calculado()
         super().save(*args, **kwargs)
 
 # 10. DETALLE DE FACTURA
 class FacturaDetalle(models.Model):
+    METODOS_PAGO = (
+            ('EFECTIVO', 'Efectivo en local'),
+            ('TRANSFERENCIA', 'Transferencia / Bre-B / Nequi / Daviplata'),
+            ('TARJETA', 'Tarjeta Crédito / Débito'),
+        )
+
     id_detalle = models.AutoField(primary_key=True)
-    facturaf = models.ForeignKey(Factura, on_delete=models.CASCADE, db_column='id_factura', related_name='fdetalles')
+    facturaf = models.OneToOneField(Factura, on_delete=models.CASCADE, db_column='id_factura', related_name='fdetalles')
 
     monto_anticipo_30 = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, validators=[MinValueValidator(Decimal('0.00'))])
     monto_restante_70 = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, validators=[MinValueValidator(Decimal('0.00'))])
     subtotal = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, validators=[MinValueValidator(Decimal('0.00'))])
 
+    metodo_pago = models.CharField(max_length=20, choices=METODOS_PAGO, default='EFECTIVO')
     estado = models.BooleanField(default=True)
     objects=models.Manager()
 
     class Meta:
         db_table = 'factura_detalle'
 
-    def 
+    def traer_iva(self):
+        factura = getattr(self, 'fdetalles', None)
+        if factura:
+            impuesto = getattr(factura, 'impuesto', Decimal('0.00'))
+            return impuesto
+        return Decimal('0.00')
+
+    
+
+    def calcular_totales(self):
+        if not self.pk:
+            return
+        calcular = self.fdetalles_cita.aggregate(total = Sum('serviciof__precio'))
+        total = calcular.get('total') or Decimal('0.00')
+        total_iva = (total * self.traer_iva()).quantize(Decimal('0.01'))
+        self.subtotal = total + total_iva
+
+        self.monto_anticipo_30 = (total * Decimal('0.30')).quantize(Decimal('0.01'))
+        self.monto_restante_70 = total - self.monto_anticipo_30
+
+    def save(self, *args, **kwargs):
+        self.calcular_totales()
+        super().save(*args, **kwargs)
