@@ -355,7 +355,7 @@ class DetallesCita(models.Model):
     establecimiento = models.CharField(max_length=150, verbose_name='Nombre establecimiento', editable=False, blank=True, null=True)
     fecha_cita = models.DateField()
     hora_inicio = models.TimeField()
-    hora_fin_ = models.TimeField(blank=True, null=True, editable=False, verbose_name='Hora Fin Calculada')
+    hora_fin = models.TimeField(blank=True, null=True, editable=False, verbose_name='Hora Fin Calculada')
     duracion_minutos = models.IntegerField(help_text="Duración estimada en minutos", blank=True, null=True, editable=False)
     activo = models.BooleanField(default=True)
     objects=models.Manager()
