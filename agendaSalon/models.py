@@ -302,8 +302,8 @@ class Cita(models.Model):
     
     nota = models.TextField(blank=True, null=True)
 
-    fecha_expiracion = models.DateTimeField(null=True, blank=True, help_text="Límite de 7 minutos para pago de anticipo")
-    creado_el = models.DateTimeField(auto_now_add=True)
+    fecha_expiracion = models.DateTimeField(null=True, blank=True, help_text="Límite de 7 minutos para pago de anticipo", editable=False)
+    creado_el = models.DateTimeField(auto_now_add=True, editable=False)
     ultima_actualizacion = models.DateTimeField(auto_now=True)
     codigo_unico = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     estadocita=models.BooleanField(default=True)
@@ -351,12 +351,12 @@ class Cita(models.Model):
 class DetallesCita(models.Model):
     id_detalle = models.AutoField(primary_key=True)
     serviciof = models.ForeignKey(Servicio, on_delete=models.CASCADE, db_column='id_servicio', related_name='fdetalles', verbose_name='Servicio')
-    trabajador = models.CharField(max_length=150, blank=True, null=True, verbose_name='Nombre del Trabajador')
-    establecimiento = models.CharField(max_length=150, verbose_name='Nombre establecimiento')
+    trabajador = models.CharField(max_length=150, blank=True, null=True, verbose_name='Nombre del Trabajador', editable=False)
+    establecimiento = models.CharField(max_length=150, verbose_name='Nombre establecimiento', editable=False, blank=True, null=True)
     fecha_cita = models.DateField()
     hora_inicio = models.TimeField()
-    hora_fin_ = models.TimeField(blank=True, null=True)
-    duracion_minutos = models.IntegerField(help_text="Duración estimada en minutos")
+    hora_fin_ = models.TimeField(blank=True, null=True, editable=False, verbose_name='Hora Fin Calculada')
+    duracion_minutos = models.IntegerField(help_text="Duración estimada en minutos", blank=True, null=True, editable=False)
     activo = models.BooleanField(default=True)
     objects=models.Manager()
 
@@ -383,8 +383,13 @@ class DetallesCita(models.Model):
         est = getattr(cita, 'nombre_establecimientof', None) if cita else None
         servicio_cate = getattr(servicio, 'categoriaf', None) if servicio else None
         categoria_est = getattr(servicio_cate, 'establecimientof', None) if servicio_cate else None
+        
         if est and categoria_est:
-            self.establecimiento = getattr(categoria_est, 'nombre', '')
+            if est.pk != categoria_est.pk:
+                raise ValidationError(
+                    'El servicio no pertenece al mismo establecimiento de la cita.'
+                )
+        self.establecimiento = getattr(categoria_est, 'nombre', '')
 
     def hora_fin_calculada(self):
         if self.hora_inicio and self.fecha_cita and self.duracion_minutos:
@@ -412,6 +417,7 @@ class Factura(models.Model):
         ('PENDIENTE_ANTICIPO', 'Pendiente de Anticipo 30%'),
         ('ANTICIPO_PAGADO', 'Anticipo Pagado (Parcial)'),
         ('PAGADA', 'Pagada en su Totalidad'),
+        ('CANCELADA', 'Cancelada'),
     )
 
     id_factura = models.AutoField(primary_key=True)
@@ -420,11 +426,11 @@ class Factura(models.Model):
     numero_factura = models.CharField(max_length=50, unique=True, blank=True, editable=False)
 
     impuesto = models.DecimalField(max_digits=12, decimal_places=2, default=0.19, validators=[MinValueValidator(Decimal('0.00'))])
-    total_general = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, validators=[MinValueValidator(Decimal('0.00'))])
+    total_general = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, editable=False, validators=[MinValueValidator(Decimal('0.00'))])
     
     
-    pagada = models.BooleanField(default=False)
-    fecha_emision = models.DateTimeField(auto_now_add=True)
+    estado = models.BooleanField(default=False)
+    fecha_emision = models.DateTimeField(auto_now_add=True, editable=False)
     estadodepago = models.CharField(max_length=30, choices=ESTADOS_PAGO, default='PENDIENTE_ANTICIPO')
     objects=models.Manager()
 
@@ -432,9 +438,13 @@ class Factura(models.Model):
         db_table = 'factura'
 
     def traer_uuid_cita(self):
-        cita = getattr(self, 'citaf', None)
-        if cita:
-            self.cita = str(getattr(cita, 'codigo_unico', ''))
+        detalle = getattr(self, 'fdetalles', None)
+        if detalle:
+            detalle_cita = getattr(detalle, 'fdetalles_cita', None)
+            if detalle_cita:
+                cita = getattr(detalle_cita, 'fdetalles', None)
+                if cita:
+                    self.cita = str(getattr(cita, 'codigo_unico', ''))
 
     def crear_numero_factura(self):
         if not self.numero_factura:
@@ -450,7 +460,10 @@ class Factura(models.Model):
     def total_general_calculado(self):
         detalle= getattr(self, 'fdetalles', None)
         if detalle:
-            self.total_general = getattr(detalle, 'subtotal', Decimal('0.00'))
+            subtotal = getattr(detalle, 'subtotal', Decimal('0.00'))
+            valor_iva = (subtotal * self.impuesto).quantize(Decimal('0.01'))
+            self.total_general = subtotal + valor_iva
+
 
 
     def save(self, *args, **kwargs):
@@ -471,9 +484,9 @@ class FacturaDetalle(models.Model):
     id_detalle = models.AutoField(primary_key=True)
     facturaf = models.OneToOneField(Factura, on_delete=models.CASCADE, db_column='id_factura', related_name='fdetalles')
 
-    monto_anticipo_30 = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, validators=[MinValueValidator(Decimal('0.00'))])
-    monto_restante_70 = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, validators=[MinValueValidator(Decimal('0.00'))])
-    subtotal = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, validators=[MinValueValidator(Decimal('0.00'))])
+    monto_anticipo_30 = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, editable=False, validators=[MinValueValidator(Decimal('0.00'))])
+    monto_restante_70 = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, editable=False, validators=[MinValueValidator(Decimal('0.00'))])
+    subtotal = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, editable=False, validators=[MinValueValidator(Decimal('0.00'))])
 
     metodo_pago = models.CharField(max_length=20, choices=METODOS_PAGO, default='EFECTIVO')
     estado = models.BooleanField(default=True)
@@ -496,8 +509,8 @@ class FacturaDetalle(models.Model):
             return
         calcular = self.fdetalles_cita.aggregate(total = Sum('serviciof__precio'))
         total = calcular.get('total') or Decimal('0.00')
-        total_iva = (total * self.traer_iva()).quantize(Decimal('0.01'))
-        self.subtotal = total + total_iva
+        
+        self.subtotal = total
 
         self.monto_anticipo_30 = (total * Decimal('0.30')).quantize(Decimal('0.01'))
         self.monto_restante_70 = total - self.monto_anticipo_30

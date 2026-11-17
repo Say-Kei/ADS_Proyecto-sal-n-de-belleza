@@ -10,7 +10,7 @@ from .models import (
     Cita,
     Factura,
     FacturaDetalle,
-    Resena,
+    DetallesCita,
 )
 
 Rol = PerfilUsuario.RolChoices
@@ -30,8 +30,8 @@ PERMISOS_POR_ROL = {
         'horariotrabajador': {VER, AGREGAR, CAMBIAR},
         'cita': {VER, AGREGAR, CAMBIAR},
         'factura': {VER},
-        'facturadetalle': {VER},
-        'resena': {VER, AGREGAR, CAMBIAR},
+        'facturadetalle': {VER, AGREGAR, CAMBIAR},
+        'detallescita': {VER, AGREGAR, CAMBIAR},
     },
     Rol.ADMIN_NEGOCIO: {
         'establecimiento': {VER, CAMBIAR},
@@ -42,8 +42,8 @@ PERMISOS_POR_ROL = {
         'horariotrabajador': {VER, AGREGAR, CAMBIAR},
         'cita': {VER, AGREGAR, CAMBIAR},
         'factura': {VER},
-        'facturadetalle': {VER},
-        'resena': {VER, AGREGAR, CAMBIAR},
+        'facturadetalle': {VER, AGREGAR},
+        'detallescita': {VER, AGREGAR, CAMBIAR},
     },
     Rol.ASISTENTE: {
         'establecimiento': {VER},
@@ -55,7 +55,7 @@ PERMISOS_POR_ROL = {
         'cita': {VER, AGREGAR, CAMBIAR},
         'factura': {VER},
         'facturadetalle': {VER},
-        'resena': {VER, AGREGAR, CAMBIAR},
+        'detallescita': {VER, AGREGAR, CAMBIAR},
     },
     Rol.TRABAJADOR: {
         'perfilusuario': {VER},
@@ -139,10 +139,11 @@ LOOKUP_ESTABLECIMIENTO = {
     'servicio': 'categoriaf__establecimientof',
     'horarioestablecimiento': 'establecimientof',
     'horariotrabajador': 'trabajadorf__establecimientof',
-    'cita': 'serviciof__categoriaf__establecimientof',
-    'factura': 'citaf__serviciof__categoriaf__establecimientof',
-    'facturadetalle': 'facturaf__citaf__serviciof__categoriaf__establecimientof',
-    'resena': 'citaf__serviciof__categoriaf__establecimientof',
+    'cita': 'nombre_establecimientof',
+    'detallescita': ['serviciof__categoriaf__establecimientof'
+                     , 'citaf__nombre_establecimientof'],
+    'factura': 'fdetalles__fdetalles_cita__fdetalles__serviciof__categoriaf__establecimientof',
+    'facturadetalle': 'detalles_facturaf__serviciof__categoriaf__establecimientof',
 }
 
 LOOKUP_PROPIO_TRABAJADOR = {
@@ -153,7 +154,7 @@ LOOKUP_PROPIO_TRABAJADOR = {
 
 MODELOS_CON_ESTABLECIMIENTO = {
     Establecimiento, PerfilUsuario, Categoria, Servicio, HorarioEstablecimiento,
-    HorarioTrabajador, Cita, Factura, FacturaDetalle, Resena,
+    HorarioTrabajador, Cita, Factura, FacturaDetalle, DetallesCita,
 }
 
 def filtrar_query_por_user(queryset, user):
@@ -197,12 +198,21 @@ def filtrar_query_por_user(queryset, user):
 def _cita_de(obj):
     if isinstance(obj, Cita):
         return obj
+    if isinstance(obj, DetallesCita):
+        return obj.citaf
     if isinstance(obj, FacturaDetalle):
-        return obj.facturaf.citaf
-    return getattr(obj, 'citaf', None)
+        primer = obj.fdetalles_cita.selct_related('citaf').first()
+        return primer.citaf if primer else None
+    if isinstance(obj, Factura):
+        facde = getattr(obj, 'fdetalle', None)
+        if facde is None:
+            return None
+        primer = facde.fdetalles_cita.selct_related('citaf').first()
+        return primer.citaf if primer else None
+
+    return None
 
 def establecimiento_id_de(obj):
-    """Devuelve el id del salón al que pertenece cualquier registro (o None)."""
     if isinstance(obj, Establecimiento):
         return obj.pk
     if isinstance(obj, (PerfilUsuario, Categoria, HorarioEstablecimiento)):
@@ -211,12 +221,13 @@ def establecimiento_id_de(obj):
         return obj.categoriaf.establecimientof_id
     if isinstance(obj, HorarioTrabajador):
         return obj.trabajadorf.establecimientof_id
-    if isinstance(obj, (Cita, Factura, FacturaDetalle, Resena)):
+    if isinstance(obj, Cita):
+        return obj.nombre_establecimientof_id
+    if isinstance(obj, DetallesCita):
+        return obj.serviciof.categoriaf.establecimientof_id
+    if isinstance(obj, (Factura, FacturaDetalle)):
         cita = _cita_de(obj)
-        if cita is None:
-            return None
-        # La cita no guarda el salón directo: se obtiene por sus servicios.
-        return cita.serviciof.values_list('categoriaf__establecimientof_id', flat=True).first()
+        return cita.nombre_establecimientof_id if cita else None
     return None
 
 def puede_acceder_objeto(user, obj):
@@ -242,9 +253,13 @@ def puede_acceder_objeto(user, obj):
             return obj.pk == perfil.pk
         if isinstance(obj, HorarioTrabajador):
             return obj.trabajadorf_id == perfil.pk
+        if isinstance(obj, DetallesCita):
+            return obj.serviciof.trabajadoresf.filter(pk=perfil.pk).exists()
         if isinstance(obj, Cita):
-            return obj.trabajadorf.filter(pk=perfil.pk).exists()
+            return obj.fdetalles.filter(serviciof__trabajadoresf = perfil).exists()
         return False
+
+    return False
 
     # Cualquier otro caso: sin acceso.
     return False

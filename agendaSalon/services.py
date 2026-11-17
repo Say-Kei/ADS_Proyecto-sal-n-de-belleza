@@ -18,7 +18,7 @@ from .models import (
     Cita,
     Factura,
     FacturaDetalle,
-    Resena,
+    DetallesCita,
     HorarioEstablecimiento,   # ahora se usa en validar_horario (días cerrados)
     HorarioTrabajador
 )

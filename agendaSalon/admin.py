@@ -16,7 +16,7 @@ from .models import (
     Cita,
     Factura,
     FacturaDetalle,
-    #Resena,
+    DetallesCita,
     HorarioEstablecimiento,
     HorarioTrabajador,
 )
