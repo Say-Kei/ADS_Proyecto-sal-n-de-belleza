@@ -4,7 +4,7 @@ from django.utils import timezone  # tiene hora y zona horaria
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.db import transaction
 from typing import List, Union
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Q
 from django.contrib.auth import authenticate, password_validation
 from django.contrib.auth.models import User
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -31,27 +31,24 @@ from .permissions import (
     obtener_rol,
 )
 
+from .validators import validar_usuario_activo
+
 class AuthService: 
     @staticmethod
-    def auenticar_generar_tokens(username_o_email: str, password: str) -> dict:
-        username = username_o_email
-        if '@' in username_o_email:
-            user_obj = User.objects.filter(email__iexact=username_o_email).first()
-            if user_obj:
-                username = user_obj.username
- 
-        # authenticate() compara la contraseña con la versión encriptada guardada.
-        # Devuelve el usuario si es correcta o None si no.
-        user = authenticate(username=username, password=password)
+    def validar_credenciales(username_o_email: str, password: str) -> User:
+        user = User.objects.filter(Q(email__iexact=username_o_email) | Q(username=username_o_email)).first()
         if not user:
-            # Mensaje genérico a propósito: no revela si falló el usuario o la clave.
-            raise ValidationError("Credenciales inválidas. Verifique su usuario/correo y contraseña.")
- 
+            raise ValidationError("Credenciales inválidas.")
+        
+        if not user.check_password(password):
+            raise ValidationError("Credenciales inválidas.")
         if not user.is_active:
             raise PermissionDenied("Esta cuenta de usuario se encuentra desactivada.")
- 
-        # `fperfil` es el nombre con el que el User llega a su PerfilUsuario (ver models.py).
-        # getattr(..., None) evita un error si el usuario no tiene perfil.
+        
+"""Me quede aqui, ssepare en dos funciones credenciales y token, falta juntar los dos metodos para generar token"""
+    @staticmethod
+    def autenticar_generar_tokens(username_o_email: str, password: str) -> dict:
+        validar_credenciales(User)
         perfil = getattr(user, 'fperfil', None)
         es_super = user.is_superuser or (perfil is not None and perfil.rol == Rol.SUPERADMIN)
  
@@ -158,8 +155,42 @@ class AuthService:
             return True
         except TokenError as err:
             raise ValidationError("El token proporcionado no es válido o ya ha expirado.") from err
- 
+#revisado
+class ValidarEstablecimiento:
+    @staticmethod
+    def _validar_tipo_establecimiento(establecimiento: Establecimiento):
+        if not isinstance(establecimiento, Establecimiento):
+                raise TypeError("El establecimeinto no existe o esta mal en el models")
+    @staticmethod
+    def validar_establecimiento_activo(establecimiento: Establecimiento,
+                                       usuario)-> bool:
+        validar_usuario_activo(usuario)
+        ValidarEstablecimiento._validar_tipo_establecimiento(establecimiento)
 
+
+        if usuario.is_superuser:
+            return True
+        
+        else:
+            establecimiento_activo =Establecimiento.objects.filter(
+                        pk=establecimiento.pk,
+                        estado=True
+                    ).exists()
+        
+        
+            try:
+                perfil = usuario.fperfil
+            except PerfilUsuario.DoesNotExist:
+                raise PermissionDenied("No tiene perfil")
+            
+            if perfil.fpersonal_id != establecimiento.pk:
+                raise PermissionDenied("El usuario no pertenece a este establecimiento")
+
+            if not establecimiento_activo:
+                raise ValidationError("El establecimiento no esta activo")
+        return True
+
+    
 class ValidarService:
     @staticmethod
     def validar_multicliente(

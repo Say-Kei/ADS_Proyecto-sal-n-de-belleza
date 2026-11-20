@@ -1,14 +1,23 @@
 from django.shortcuts import render
 
 # Create your views here.
+from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 
-from .services import ComisionServices
+from .models import Establecimiento
+
+from .services import (ComisionServices,
+                       ValidarEstablecimiento
+                       )
+
 from .serializers import ReporteComisionTrabajadorSerializer
 
+from .permissions import (roles_permitidos,
+                          Rol,
+                          )
 class ConsultarComisionesTrabajadorView(APIView):
     """
     Endpoint para que un trabajador consulte sus comisiones acumuladas.
@@ -50,3 +59,29 @@ def salones_servicios(request):
 
 def salones_ubicacion(request):
     return render (request, 'reservaglow/salones/salon_esencia/cliente/estructuras/ubicacion.html')
+
+#usuario entra
+class ConsultarUsuario(APIView):
+
+    permission_classes=[roles_permitidos(Rol.SUPERADMIN, Rol.ADMIN_NEGOCIO)]
+
+
+    def post(self, request):
+        usuario = request.user
+        establecimiento_id = request.data.get('establecimiento_id')
+        if not establecimiento_id:
+            raise ValidationError("El identificador del establecimiento es obligatorio")
+        try:
+            establecimiento = Establecimiento.objects.get(pk=establecimiento_id)
+        except Establecimiento.DoesNotExist:
+            raise NotFound("Establecimeinto no encontrado")
+    #Aquí llamas a tu servicio
+        ValidarEstablecimiento.validar_establecimiento_activo(
+            establecimiento,
+            usuario
+        )
+        return Response(
+            {"confirmado": "Datos procesados correctamente."},
+            status=status.HTTP_200_OK
+        )
+
